@@ -14,7 +14,8 @@
 2. `.github/skills/` の中身を `~/.copilot/skills/` にコピーする。Windows なら `%USERPROFILE%\.copilot\skills\`。
 3. `templates/copilot-cli-mcp-config.json` を `~/.copilot/mcp-config.json` にコピーする。**ワークスペースに `.mcp.json` を置いても CLI は読まない。** 実測で確認済み。さらに VS Code はルートの `.mcp.json` も読むので、`.vscode/mcp.json` と二重登録になる。ルートには置かない。詳細は `docs/verified-on-cli.md`。
 4. `templates/copilot-cli-settings.json` を `~/.copilot/settings.json` にコピーする。既定モデル、エージェント別モデル、権限モードが固定される。一覧にあっても契約で使えないモデル名は黙って `mai-code-1.1-flash` に落ちるので、コピー後に `copilot -p "Reply with OK" --usage-output-file u.json` を実行し、`modelMetrics` に意図したモデル名が出ることを確認する。
-5. VS Code のユーザープロファイルにカスタムエージェントとプロンプトを登録する。チャットビューの設定から追加できる。
+5. `templates/user-copilot-instructions.md` を `~/.copilot/copilot-instructions.md` にコピーし、自分の好みに書き換える。自分のリクエスト全部に載るので短く保つ。
+6. VS Code のユーザープロファイルにカスタムエージェントとプロンプトを登録する。チャットビューの設定から追加できる。
 
 この状態で `/plan` と `/review` が使える。
 

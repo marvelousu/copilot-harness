@@ -20,9 +20,12 @@ scripts/guard_sensitive_paths.py  資格情報ファイルは拒否、force push
 .vscode/mcp.json                  VS Code 用 MCP 設定
 templates/copilot-cli-mcp-config.json  CLI 用 MCP 設定。~/.copilot/mcp-config.json にコピーする
 templates/copilot-cli-settings.json    CLI 用設定。既定モデルとエージェント別モデルを固定する
+templates/user-copilot-instructions.md 個人の好み。~/.copilot/copilot-instructions.md にコピーする
+docs/decisions.md                 コードから読めない決定の記録
+docs/recording-policy.md          何をどこに残すか
 docs/verified-on-cli.md           実機検証の結果と既知の不具合。先に読む
 docs/cost-playbook.md             クレジット消費を抑える運用
-docs/model-routing.md             作業ごとのモデル振り分け
+docs/model-routing.md             作業ごとのモデル振り分けと単価表
 docs/mcp-catalog.md               入れる MCP と入れない MCP
 docs/install.md                   導入手順
 ```
@@ -32,12 +35,26 @@ docs/install.md                   導入手順
 | ファイル | 読み込まれるタイミング | 置いてよい内容 |
 |---|---|---|
 | `copilot-instructions.md` | 毎回 | 全作業に効く短い規約だけ |
+| `~/.copilot/copilot-instructions.md` | 自分の毎回 | 個人の好み。チームのリポジトリに入れない |
 | `*.instructions.md` | 対象ファイルを触るとき | 言語別、ディレクトリ別の規約 |
 | `SKILL.md` | 関連すると判断されたとき | 長い手順、チェックリスト |
 | `*.prompt.md` | 明示的に呼んだとき | 定型作業の指示 |
 | `*.agent.md` | そのエージェントを選んだとき | 役割の固定 |
 
 長い内容を `copilot-instructions.md` に書くと、使わないリクエストでも毎回課金される。実測では指示ファイルはプロンプトキャッシュの外に載るため、同じトークン数でも MCP のツール定義より高くつく。手順はスキルに置く。
+
+## スキル
+
+| 名前 | 使うとき |
+|---|---|
+| spec | 大きめの機能の前に、対話で仕様を詰めて SPEC.md を書く |
+| plan-first | 非自明な変更の前に、案を比較して受け入れ基準を決める |
+| debug-workflow | エラー、クラッシュ、原因不明の挙動を調べる |
+| review-rubric | 「完成した」「全緑」の報告を受けたとき、PR を見るとき |
+| git-workflow | コミット、PR、ブランチ名を決めるとき |
+| handoff | 作業を別セッションや他の人へ渡すとき |
+
+`review-rubric` はこの一式で最も価値がある部分で、48項目のチェックリストになっている。
 
 ## エージェント
 
@@ -51,7 +68,13 @@ CLI では `templates/copilot-cli-settings.json` の `subagents.agents` でモ�
 
 ## 使い方
 
-計画から始める。
+大きめの機能は仕様から始める。
+
+```
+/spec 注文一覧に CSV 書き出しを付けたい
+```
+
+小さめなら計画から。
 
 ```
 /plan このモジュールにリトライ処理を入れたい
@@ -63,13 +86,9 @@ CLI では `templates/copilot-cli-settings.json` の `subagents.agents` でモ�
 /review
 ```
 
-`review-rubric` スキルは「完成した」「全緑」という報告を受けたときに通すチェックリストで、この一式で最も価値がある部分。
+## 記録
 
-## 記憶
-
-Copilot 組み込みの Memory を使う。リポジトリ単位で、coding agent、code review、CLI の間で共有され、28日で失効する。CLI では設定 `memory` が既定で有効。別途 memory MCP は置かない。
-
-失効させたくない決定は、採らなかった案と理由を添えて `docs/decisions.md` に残す。指示ファイルにその一行を入れてあり、無ければエージェントが作る。
+何をどこに残すかは `docs/recording-policy.md` にまとめてある。要点は、Copilot 組み込みの Memory に任せる範囲を限定し、失効させたくない決定は `docs/decisions.md` に、個人の好みは `~/.copilot/copilot-instructions.md` に置くこと。別途 memory MCP は置かない。職場では Memory のポリシーが有効か先に確認する。
 
 ## ガード
 
