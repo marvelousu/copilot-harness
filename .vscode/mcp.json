@@ -1,0 +1,36 @@
+{
+  "$comment": "VS Code は 'servers' キーを使う。'mcpServers' ではない。ツール定義は文脈を食うので、使わないサーバはツールピッカーで切る。詳細は docs/cost-playbook.md。",
+  "servers": {
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/"
+    },
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest",
+        "--browser",
+        "chrome",
+        "--user-data-dir",
+        "${userHome}/.cache/pw-mcp-profile"
+      ]
+    },
+    "playwright-ext": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest", "--extension"]
+    },
+    "windows-mcp": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["windows-mcp", "serve"],
+      "env": { "PYTHONUTF8": "1" }
+    }
+  }
+}

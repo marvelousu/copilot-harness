@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "python3 \"$GITHUB_WORKSPACE/scripts/guard_sensitive_paths.py\" || python \"$GITHUB_WORKSPACE/scripts/guard_sensitive_paths.py\""
+      }
+    ]
+  }
+}
