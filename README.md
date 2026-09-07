@@ -27,6 +27,7 @@ docs/verified-on-cli.md           実機検証の結果と既知の不具合。�
 docs/cost-playbook.md             クレジット消費を抑える運用
 docs/model-routing.md             作業ごとのモデル振り分けと単価表
 docs/mcp-catalog.md               入れる MCP と入れない MCP
+docs/plugins.md                   マーケットプレイスを全件見た上での要否
 docs/install.md                   導入手順
 ```
 
