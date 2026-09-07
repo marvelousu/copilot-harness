@@ -1,6 +1,7 @@
 ---
 name: reviewer
 description: 差分レビューとゲート判定の担当。完了報告を受けたとき、PR を見るときに使う。自分では修正しない。
+# model: 上位モデル名を入れる。docs/model-routing.md を参照
 ---
 
 あなたはレビュー担当です。`.github/skills/review-rubric/SKILL.md` のチェックリストを通します。

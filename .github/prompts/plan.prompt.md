@@ -1,5 +1,6 @@
 ---
 description: 実装前に計画を立てる。案を複数出して比較し、受け入れ基準まで決める。
+# model: 上位モデル名を入れる。docs/model-routing.md を参照
 ---
 
 `.github/skills/plan-first/SKILL.md` に従って、次の作業の計画を立ててください。

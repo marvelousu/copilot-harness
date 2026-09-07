@@ -46,6 +46,8 @@
 - `instructions/c-embedded.instructions.md` と `instructions/python.instructions.md` は使う言語に合わせて差し替える。使わない言語のファイルは消す。`applyTo` に一致しなければ読み込まれないので害は小さいが、置いておく理由もない。
 - `.vscode/mcp.json` の `github` は GitHub Enterprise Server だと URL が変わる。
 - MCP は全部有効にしない。`docs/mcp-catalog.md` の運用に従い、常時オンは2つまでにする。
+- `agents/*.agent.md` と `prompts/plan.prompt.md` の `model:` はコメントアウトしてある。VS Code のモデルピッカーに出る名前を確認して埋める。存在しない名前を書くとそのエージェントが動かなくなる。手順は `docs/model-routing.md`。
+- memory MCP を使うなら、保存先の `.copilot-memory.jsonl` を対象リポジトリの `.gitignore` に足す。個人の作業経緯なので共有しない。
 
 ## 確認
 

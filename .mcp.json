@@ -9,6 +9,12 @@
       "type": "http",
       "url": "https://mcp.context7.com/mcp"
     },
+    "memory": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "env": { "MEMORY_FILE_PATH": "./.copilot-memory.jsonl" }
+    },
     "playwright": {
       "type": "stdio",
       "command": "npx",
