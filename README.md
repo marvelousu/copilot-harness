@@ -17,6 +17,7 @@
 scripts/guard_sensitive_paths.py  資格情報を含むファイルへの操作を拒否する
 .vscode/mcp.json                  VS Code 用 MCP 設定
 .mcp.json                         Copilot CLI / Agent Host 用の可搬 MCP 設定
+docs/verified-on-cli.md           実機検証の結果と既知の不具合。先に読む
 docs/cost-playbook.md             クレジット消費を抑える運用
 docs/model-routing.md             作業ごとのモデル振り分け
 docs/mcp-catalog.md               入れる MCP と入れない MCP
@@ -64,6 +65,14 @@ docs/install.md                   導入手順
 ## 記憶
 
 Copilot には自動メモリがない。セッションをまたいで事実を持ち越すには memory MCP を使う。置くだけでは機能しないので、書く条件と読む条件を `.github/skills/memory-policy/SKILL.md` に定義してある。保存先はリポジトリ直下で、プロジェクトごとに分かれる。
+
+## 検証状況
+
+Copilot CLI 1.0.83 で実機導入し、スキルの読み込み、指示ファイル、preToolUse フック、MCP 接続、コストを実測した。結果と既知の不具合は `docs/verified-on-cli.md` にある。導入前に読むこと。
+
+要点は3つ。CLI はワークスペースの `.mcp.json` と `.github/hooks/` を読まないのでユーザーレベルに置く。CLI には github-mcp-server が内蔵されているので設定に書かない。windows-mcp は CLI とプロトコルが噛み合わず接続できない。
+
+VS Code 側は未検証。
 
 ## 導入
 

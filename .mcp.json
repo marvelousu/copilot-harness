@@ -1,10 +1,6 @@
 {
-  "$comment": "Copilot CLI / Agent Host が直接読む可搬設定。.vscode/mcp.json と内容を揃えておく。",
+  "$comment": "テンプレート。Copilot CLI はこのファイルを読まない (1.0.83 で実測)。~/.copilot/mcp-config.json にコピーして使う。github を含めないのは、CLI に github-mcp-server が内蔵されており、ここに書くと既定の絞り込みが '全ツール' に上書きされるため。詳細は docs/verified-on-cli.md。",
   "mcpServers": {
-    "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/"
-    },
     "context7": {
       "type": "http",
       "url": "https://mcp.context7.com/mcp"
@@ -19,12 +15,6 @@
       "type": "stdio",
       "command": "npx",
       "args": ["-y", "@playwright/mcp@latest", "--browser", "chrome"]
-    },
-    "windows-mcp": {
-      "type": "stdio",
-      "command": "uvx",
-      "args": ["windows-mcp", "serve"],
-      "env": { "PYTHONUTF8": "1" }
     }
   }
 }

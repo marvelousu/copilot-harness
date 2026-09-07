@@ -12,7 +12,7 @@
 
 1. このリポジトリを任意の場所にクローンする。
 2. `.github/skills/` の中身を `~/.copilot/skills/` にコピーする。Windows なら `%USERPROFILE%\.copilot\skills\`。
-3. `.mcp.json` の内容を `~/.copilot/mcp-config.json` にコピーする。
+3. `.mcp.json` の内容を `~/.copilot/mcp-config.json` にコピーする。**ワークスペースに置いたままでは CLI に読まれない。** 実測で確認済み。詳細は `docs/verified-on-cli.md`。
 4. VS Code のユーザープロファイルにカスタムエージェントとプロンプトを登録する。チャットビューの設定から追加できる。
 
 この状態で `/plan` と `/review` が使える。
@@ -33,9 +33,15 @@
 
 フックが動くのは Copilot CLI と cloud agent の2面だけで、IDE のエージェントモードでは動かない。cloud agent は Linux サンドボックスで動くため `bash` フィールドしか読まない。
 
-1. `.github/hooks/guard.json` をリポジトリに含める。
-2. Copilot CLI で使うなら `~/.copilot/hooks/` にも同じ JSON を置く。
-3. `python3` が PATH にあることを確認する。
+**CLI 1.0.83 はリポジトリ内の `.github/hooks/` を読まなかった。** 実際に発火させるにはユーザーレベルに置く。
+
+1. `~/.copilot/hooks/guard.json` を作る。Windows なら `%USERPROFILE%\.copilot\hooks\guard.json`。
+2. 中身は `.github/hooks/guard.json` と同じ形にし、`bash` のパスを絶対パスにする。`$GITHUB_WORKSPACE` は CLI では未定義なので使わない。
+3. `python` または `python3` が PATH にあることを確認する。
+
+動作確認は、資格情報を含む名前のファイルを読ませてみる。拒否されれば成功で、ログに `Denied by preToolUse hook` が残る。
+
+`.github/hooks/guard.json` は cloud agent 用に残してある。
 
 拒否されたときは標準出力に理由が出る。誤検知したら `scripts/guard_sensitive_paths.py` の `PATTERNS` を調整する。フックは失敗時に素通しする設計なので、壊れても作業は止まらない。
 

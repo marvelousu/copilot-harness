@@ -1,10 +1,11 @@
 {
+  "$comment": "Copilot CLI 1.0.83 はこの場所を読まなかった。実際に発火させるには ~/.copilot/hooks/guard.json に置き、bash のパスを絶対パスにする。詳細は docs/verified-on-cli.md。",
   "version": 1,
   "hooks": {
     "preToolUse": [
       {
         "type": "command",
-        "bash": "python3 \"$GITHUB_WORKSPACE/scripts/guard_sensitive_paths.py\" || python \"$GITHUB_WORKSPACE/scripts/guard_sensitive_paths.py\""
+        "bash": "python3 scripts/guard_sensitive_paths.py || python scripts/guard_sensitive_paths.py"
       }
     ]
   }
