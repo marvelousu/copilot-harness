@@ -1,5 +1,5 @@
 {
-  "$comment": "VS Code は 'servers' キーを使う。'mcpServers' ではない。ツール定義は文脈を食うので、使わないサーバはツールピッカーで切る。詳細は docs/cost-playbook.md。",
+  "$comment": "VS Code 用。'servers' キーを使う。VS Code はこのファイルとルートの .mcp.json の両方を読むので、ルートには .mcp.json を置かない (二重登録になる、実測済み)。使わないサーバはツールピッカーで切る。",
   "servers": {
     "github": {
       "type": "http",
@@ -34,11 +34,10 @@
       "command": "npx",
       "args": ["-y", "@playwright/mcp@latest", "--extension"]
     },
-    "windows-mcp": {
+    "desktop": {
       "type": "stdio",
-      "command": "uvx",
-      "args": ["windows-mcp", "serve"],
-      "env": { "PYTHONUTF8": "1" }
+      "command": "npx",
+      "args": ["-y", "@zavora-ai/computer-use-mcp"]
     }
   }
 }

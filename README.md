@@ -16,7 +16,7 @@
   hooks/guard.json                preToolUse フック定義
 scripts/guard_sensitive_paths.py  資格情報を含むファイルへの操作を拒否する
 .vscode/mcp.json                  VS Code 用 MCP 設定
-.mcp.json                         Copilot CLI / Agent Host 用の可搬 MCP 設定
+templates/copilot-cli-mcp-config.json  Copilot CLI 用。~/.copilot/mcp-config.json にコピーする
 docs/verified-on-cli.md           実機検証の結果と既知の不具合。先に読む
 docs/cost-playbook.md             クレジット消費を抑える運用
 docs/model-routing.md             作業ごとのモデル振り分け
@@ -70,9 +70,9 @@ Copilot には自動メモリがない。セッションをまたいで事実を
 
 Copilot CLI 1.0.83 で実機導入し、スキルの読み込み、指示ファイル、preToolUse フック、MCP 接続、コストを実測した。結果と既知の不具合は `docs/verified-on-cli.md` にある。導入前に読むこと。
 
-要点は3つ。CLI はワークスペースの `.mcp.json` と `.github/hooks/` を読まないのでユーザーレベルに置く。CLI には github-mcp-server が内蔵されているので設定に書かない。windows-mcp は CLI とプロトコルが噛み合わず接続できない。
+要点は4つ。CLI はワークスペースの MCP 設定と `.github/hooks/` を読まないのでユーザーレベルに置く。CLI には github-mcp-server が内蔵されているので設定に書かない。GUI 操作は `desktop` サーバで CLI から可能で、ウィンドウ列挙から VS Code の操作まで実測した。VS Code は `.vscode/mcp.json` とルートの `.mcp.json` の両方を読むので、ルートには置かない。
 
-VS Code 側は未検証。
+VS Code は設定の読み込みまで確認済み。実行時の接続はサインイン待ちで未検証。
 
 ## 導入
 

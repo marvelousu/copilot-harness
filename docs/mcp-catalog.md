@@ -42,19 +42,19 @@ Copilot には自動メモリがない。セッションをまたいで事実を
 
 既存のブラウザセッションに拡張経由で接続する。社内システムなど、ログイン済みの状態が必要な相手に使う。新しいプロファイルを立てないので認証をやり直さずに済む。
 
-### windows-mcp（必要時）
+### desktop（必要時）
 
-**これが computer use の MCP である。** CursorTouch 製で、Click、Type、Scroll、Shortcut、Screenshot、UI ツリーの Snapshot、アプリの起動と管理を提供する。ブラウザ外のネイティブアプリを触る手段はこれになる。`uv` が必要。
+**これが computer use の MCP である。** `@zavora-ai/computer-use-mcp` を `desktop` という名前で登録している。ウィンドウの列挙と切り替え、要素の検索とクリック、フォーム入力、キー送信、スクリーンショットを提供し、Windows、macOS、Linux で動く。Rust のネイティブモジュールで、`npx` で起動する。
 
-同種のサーバは他にもある。用途で選ぶ。
+**Copilot CLI で接続、ウィンドウ列挙、VS Code の操作まで実測済み。** MCP プロトコルの 2026-07-28 と旧版の両方を話すので、CLI と VS Code のどちらのクライアントにも繋がる。ツールを約30個追加するので、GUI を触る作業のときだけ有効にする。
 
-| サーバ | 特徴 |
+windows-mcp（CursorTouch 製）は候補から外した。旧プロトコルしか話せず、Copilot CLI 1.0.83 に接続できない。UI ツリーの取得が強い長所はあるが、CLI で使えない以上、この構成では採らない。VS Code 側のクライアントなら繋がる可能性はあるが未検証。
+
+| サーバ | 状態 |
 |---|---|
-| CursorTouch/Windows-MCP | Windows 専用。UI ツリー取得が強い。実績が多い |
-| zavora-ai/computer-use-mcp | Rust 実装で高速。Windows と macOS の両対応 |
-| nuphus-mcp | ウィンドウ制御とクリップボードを含む。Chrome 制御つき |
-
-Windows だけで使い、UI 要素を構造で取りたいなら Windows-MCP。macOS も混ざる、または速度が要るなら Rust 実装を検討する。
+| zavora-ai/computer-use-mcp | 採用。CLI で実測済み |
+| CursorTouch/Windows-MCP | CLI 接続不可。VS Code は未検証 |
+| domdomegg/computer-use-mcp | npm にあるが未検証 |
 
 ## 検討に値するもの
 

@@ -11,7 +11,7 @@
 
 ## 記憶
 
-- タスク開始時に memory の `search_nodes` を1回だけ呼び、対象に関する過去の経緯を確認する。
+- memory サーバが有効なら、タスク開始時に `search_nodes` を1回だけ呼び、対象に関する過去の経緯を確認する。無効なら何もしない。
 - `read_graph` は呼ばない。書く条件は `.github/skills/memory-policy/SKILL.md` に従う。
 
 ## 出力

@@ -12,8 +12,14 @@ GitHub Copilot CLI 1.0.83、Windows 11、node 24.13、uv 0.10.7 で実際に導�
 | ガードスクリプト | 拒否、通過、不正入力での素通しの3系統とも期待どおり |
 | context7 | 接続成功 |
 | memory | 起動成功。`Knowledge Graph MCP Server running on stdio` |
+| desktop | 接続成功。ウィンドウ列挙と VS Code の GUI 操作まで実行 |
+| `.github/agents/` のカスタムエージェント | `--agent reviewer` で役割と参照スキルを正しく答えた。frontmatter の `# model:` コメント行は問題ない |
 
 フックの拒否時、Copilot は「資格情報を含む可能性のあるファイルは表示できない」と返した。ツール呼び出しはブロックされ、`Denied by preToolUse hook` がログに残る。
+
+`.github/prompts/` のプロンプトファイルは VS Code の機能で、CLI のヘルプには対応する項目がない。CLI では同じ内容をスキルとして呼ぶ。
+
+導入後の確認には対話モードの `/env` を使う。読み込まれた指示ファイル、MCP サーバ、スキル、エージェント、フックが一覧される。`/instructions` で指示ファイルの有効無効を切り替えられる。
 
 ## 動かなかったもの
 
@@ -37,11 +43,13 @@ connection is serving the 2026-07-28 protocol;
 the initialize handshake is not accepted
 ```
 
-サーバ自体は起動する。MCP プロトコルのバージョンが Copilot CLI のクライアントと噛み合わない。**CLI では computer use が使えない。** VS Code の MCP クライアントは別実装なので、そちらでの動作は別途確認が要る。
+サーバ自体は起動する。エラー文の `supported` は Copilot CLI 側、`requested` はサーバ側で、**CLI は 2026-07-28 版しか受け付けず、windows-mcp は 2025-11-25 版しか話せない。** サーバに直接ハンドシェイクを送って確認したところ、0.8.2 でも 0.8.5 でも 2025-11-25 を返した。古い側が windows-mcp である。
 
 初回起動時に `uvx` が numpy を含む92パッケージを取得し、起動までおよそ50秒かかった点も注意。
 
-代替を試すなら zavora-ai/computer-use-mcp か nuphus-mcp。どちらも未検証。
+**代替の `@zavora-ai/computer-use-mcp` は CLI で動いた。** 起動ログに `MCP 2026-07-28 + legacy 2025` と出るとおり両方の版を話す。接続後にウィンドウ列挙を実行させたところ、開いている9枚のタイトルを正しく返した。さらに VS Code のウィンドウを前面化し、キー送信で Copilot Chat を開き、入力欄に文字を打って送信するところまで CLI から操作できた。**GUI 操作は CLI から可能である。**
+
+ハーネスではこれを `desktop` として登録している。
 
 ### remote の github MCP は CLI で認証できない
 
@@ -56,6 +64,23 @@ CLI と cloud agent はブラウザ経由の OAuth を使うリモート MCP に
 設定に `github` を書くと `Tools: * (all)` になり、CLI が既定で絞っている部分集合を上書きしてしまう。**CLI 用の設定に github を書かない。** ツールを増やしたいときは `--add-github-mcp-toolset` を使う。
 
 VS Code には内蔵されていないので、`.vscode/mcp.json` には残してある。
+
+## VS Code での検証
+
+VS Code 1.130 には Copilot Chat 0.58.0 が同梱されており、`code --install-extension GitHub.copilot-chat` は「組み込み拡張は下位版に置き換えられない」と拒否される。別途入れる必要はない。
+
+このリポジトリを開いたところ、ログディレクトリに MCP サーバ単位のログファイルが作られた。名前から読み込み元が分かる。
+
+| ログ名の接頭辞 | 読み込み元 |
+|---|---|
+| `mcpServer.mcp.config.ws0.<name>` | `.vscode/mcp.json` |
+| `mcpServer.workspace-dot-mcp.0.<name>` | ルートの `.mcp.json` |
+
+**両方が読まれ、同じサーバが二重に登録されていた。** context7、memory、playwright が2回ずつ現れた。CLI は `.mcp.json` を読まないので、ルートに置く利点がない。`templates/` へ移した。
+
+**実行時の接続は未検証。** サーバは Agent モードで実際に使われるまで起動せず、全ログが 0 バイトのままだった。Copilot Chat のパネルは Agent モードで開いたが、ステータスバーに Sign In が表示されており、Copilot へのサインインが済んでいない。サインインは利用者の操作なので、ここで止めた。
+
+したがって VS Code 側で未確認のものは、MCP サーバの接続、`.github/agents/` のカスタムエージェント、`.github/prompts/` のプロンプトファイル、`applyTo` 付き指示ファイルの4つ。サインイン後に Agent モードで「利用可能な MCP サーバとツールを列挙して」と投げれば、上記ログにサーバごとの結果が書かれる。
 
 ## 実測コスト
 

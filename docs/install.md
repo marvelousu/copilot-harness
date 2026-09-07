@@ -3,7 +3,7 @@
 ## 前提
 
 - VS Code と GitHub Copilot 拡張。エージェントモードとスキルには比較的新しいバージョンが要る。
-- `playwright` を使うなら Node.js。`windows-mcp` を使うなら `uv`。
+- `playwright` と `desktop` を使うなら Node.js。どちらも `npx` で起動する。
 - Visual Studio でカスタムエージェントを使う場合は 2026 の 18.4 以降。
 
 ## A. まず個人スコープで試す
@@ -12,7 +12,7 @@
 
 1. このリポジトリを任意の場所にクローンする。
 2. `.github/skills/` の中身を `~/.copilot/skills/` にコピーする。Windows なら `%USERPROFILE%\.copilot\skills\`。
-3. `.mcp.json` の内容を `~/.copilot/mcp-config.json` にコピーする。**ワークスペースに置いたままでは CLI に読まれない。** 実測で確認済み。詳細は `docs/verified-on-cli.md`。
+3. `templates/copilot-cli-mcp-config.json` を `~/.copilot/mcp-config.json` にコピーする。**ワークスペースに `.mcp.json` を置いても CLI は読まない。** 実測で確認済み。さらに VS Code はルートの `.mcp.json` も読むので、`.vscode/mcp.json` と二重登録になる。ルートには置かない。詳細は `docs/verified-on-cli.md`。
 4. VS Code のユーザープロファイルにカスタムエージェントとプロンプトを登録する。チャットビューの設定から追加できる。
 
 この状態で `/plan` と `/review` が使える。
