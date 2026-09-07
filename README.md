@@ -1,6 +1,8 @@
 # copilot-harness
 
-素の GitHub Copilot に載せる作業規約一式。指示ファイル、スキル、カスタムエージェント、プロンプト、MCP 設定、機密ファイル保護フックをまとめてある。
+Drop-in harness for a bare GitHub Copilot: instructions, skills, custom agents, MCP config, guard hook, and a cost playbook for token-based billing.
+
+素の GitHub Copilot に載せる作業規約一式。指示ファイル、スキル、カスタムエージェント、プロンプト、MCP 設定、ガードフック、CLI の設定テンプレートをまとめてある。
 
 トークン従量課金を前提に、常時読み込まれるものを小さく、詳細は必要時に読み込まれるスキルへ、という方針で構成している。
 
@@ -11,12 +13,13 @@
   copilot-instructions.md         全リクエストに載る。ここは小さく保つ
   instructions/*.instructions.md  applyTo で対象ファイルを絞った規約
   skills/*/SKILL.md               関連するときだけ読み込まれる手順
-  agents/*.agent.md               役割とモデルを固定したカスタムエージェント
-  prompts/*.prompt.md             定型作業の起動
-  hooks/guard.json                preToolUse フック定義
-scripts/guard_sensitive_paths.py  資格情報を含むファイルへの操作を拒否する
+  agents/*.agent.md               役割を固定したカスタムエージェント
+  prompts/*.prompt.md             定型作業の起動 (VS Code 用)
+  hooks/guard.json                preToolUse フック定義 (cloud agent 用)
+scripts/guard_sensitive_paths.py  資格情報ファイルは拒否、force push 等は確認を挟む
 .vscode/mcp.json                  VS Code 用 MCP 設定
-templates/copilot-cli-mcp-config.json  Copilot CLI 用。~/.copilot/mcp-config.json にコピーする
+templates/copilot-cli-mcp-config.json  CLI 用 MCP 設定。~/.copilot/mcp-config.json にコピーする
+templates/copilot-cli-settings.json    CLI 用設定。既定モデルとエージェント別モデルを固定する
 docs/verified-on-cli.md           実機検証の結果と既知の不具合。先に読む
 docs/cost-playbook.md             クレジット消費を抑える運用
 docs/model-routing.md             作業ごとのモデル振り分け
@@ -32,19 +35,19 @@ docs/install.md                   導入手順
 | `*.instructions.md` | 対象ファイルを触るとき | 言語別、ディレクトリ別の規約 |
 | `SKILL.md` | 関連すると判断されたとき | 長い手順、チェックリスト |
 | `*.prompt.md` | 明示的に呼んだとき | 定型作業の指示 |
-| `*.agent.md` | そのエージェントを選んだとき | 役割とモデルの固定 |
+| `*.agent.md` | そのエージェントを選んだとき | 役割の固定 |
 
-長い内容を `copilot-instructions.md` に書くと、使わないリクエストでも毎回課金される。手順はスキルに置く。
+長い内容を `copilot-instructions.md` に書くと、使わないリクエストでも毎回課金される。実測では指示ファイルはプロンプトキャッシュの外に載るため、同じトークン数でも MCP のツール定義より高くつく。手順はスキルに置く。
 
 ## エージェント
 
-| 名前 | 用途 | 想定モデル |
+| 名前 | 用途 | 段 |
 |---|---|---|
 | implementer | 方針が決まった実装 | 中位 |
 | reviewer | 差分レビューとゲート判定 | 上位 |
 | mechanical | 一括リネーム、定型変換 | 下位 |
 
-`model:` は組織の契約でモデル名が変わるためコメントアウトしてある。導入時に `docs/model-routing.md` に従って埋める。
+CLI では `templates/copilot-cli-settings.json` の `subagents.agents` でモデルを固定する。VS Code では frontmatter の `model:` を使うが、ピッカーの名前を確認するまでコメントアウトしてある。詳細は `docs/model-routing.md`。
 
 ## 使い方
 
@@ -64,11 +67,17 @@ docs/install.md                   導入手順
 
 ## 記憶
 
-Copilot には自動メモリがない。セッションをまたいで事実を持ち越すには memory MCP を使う。置くだけでは機能しないので、書く条件と読む条件を `.github/skills/memory-policy/SKILL.md` に定義してある。保存先はリポジトリ直下で、プロジェクトごとに分かれる。
+Copilot 組み込みの Memory を使う。リポジトリ単位で、coding agent、code review、CLI の間で共有され、28日で失効する。CLI では設定 `memory` が既定で有効。別途 memory MCP は置かない。
+
+失効させたくない決定は、採らなかった案と理由を添えて `docs/decisions.md` に残す。指示ファイルにその一行を入れてあり、無ければエージェントが作る。
+
+## ガード
+
+`scripts/guard_sensitive_paths.py` は2段で動く。資格情報を含むファイルへの操作は拒否し、force push、`--no-verify`、`reset --hard` は確認を挟む。cloud agent では確認が拒否に格下げされるので、無人環境ほど安全側に倒れる。
 
 ## 検証状況
 
-Copilot CLI 1.0.83 で実機導入し、スキルの読み込み、指示ファイル、preToolUse フック、MCP 接続、コストを実測した。結果と既知の不具合は `docs/verified-on-cli.md` にある。導入前に読むこと。
+Copilot CLI 1.0.83 で実機導入し、スキル、指示ファイル、カスタムエージェント、フック、MCP 接続、設定テンプレート、コストを実測した。結果と既知の不具合は `docs/verified-on-cli.md` にある。導入前に読むこと。
 
 要点は4つ。CLI はワークスペースの MCP 設定と `.github/hooks/` を読まないのでユーザーレベルに置く。CLI には github-mcp-server が内蔵されているので設定に書かない。GUI 操作は `desktop` サーバで CLI から可能で、ウィンドウ列挙から VS Code の操作まで実測した。VS Code は `.vscode/mcp.json` とルートの `.mcp.json` の両方を読むので、ルートには置かない。
 

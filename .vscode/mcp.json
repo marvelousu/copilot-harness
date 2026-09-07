@@ -1,5 +1,5 @@
 {
-  "$comment": "VS Code 用。'servers' キーを使う。VS Code はこのファイルとルートの .mcp.json の両方を読むので、ルートには .mcp.json を置かない (二重登録になる、実測済み)。使わないサーバはツールピッカーで切る。",
+  "$comment": "VS Code 用。'servers' キーを使う。VS Code はこのファイルとルートの .mcp.json の両方を読むので、ルートには .mcp.json を置かない (二重登録になる、実測済み)。使わないサーバはツールピッカーで切る。記憶は Copilot 組み込みの Memory を使うので memory サーバは置かない。",
   "servers": {
     "github": {
       "type": "http",
@@ -8,14 +8,6 @@
     "context7": {
       "type": "http",
       "url": "https://mcp.context7.com/mcp"
-    },
-    "memory": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory"],
-      "env": {
-        "MEMORY_FILE_PATH": "${workspaceFolder}/.copilot-memory.jsonl"
-      }
     },
     "playwright": {
       "type": "stdio",

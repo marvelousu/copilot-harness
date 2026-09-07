@@ -13,7 +13,8 @@
 1. このリポジトリを任意の場所にクローンする。
 2. `.github/skills/` の中身を `~/.copilot/skills/` にコピーする。Windows なら `%USERPROFILE%\.copilot\skills\`。
 3. `templates/copilot-cli-mcp-config.json` を `~/.copilot/mcp-config.json` にコピーする。**ワークスペースに `.mcp.json` を置いても CLI は読まない。** 実測で確認済み。さらに VS Code はルートの `.mcp.json` も読むので、`.vscode/mcp.json` と二重登録になる。ルートには置かない。詳細は `docs/verified-on-cli.md`。
-4. VS Code のユーザープロファイルにカスタムエージェントとプロンプトを登録する。チャットビューの設定から追加できる。
+4. `templates/copilot-cli-settings.json` を `~/.copilot/settings.json` にコピーする。既定モデル、エージェント別モデル、権限モードが固定される。一覧にあっても契約で使えないモデル名は黙って `mai-code-1.1-flash` に落ちるので、コピー後に `copilot -p "Reply with OK" --usage-output-file u.json` を実行し、`modelMetrics` に意図したモデル名が出ることを確認する。
+5. VS Code のユーザープロファイルにカスタムエージェントとプロンプトを登録する。チャットビューの設定から追加できる。
 
 この状態で `/plan` と `/review` が使える。
 
@@ -53,7 +54,7 @@
 - `.vscode/mcp.json` の `github` は GitHub Enterprise Server だと URL が変わる。
 - MCP は全部有効にしない。`docs/mcp-catalog.md` の運用に従い、常時オンは2つまでにする。
 - `agents/*.agent.md` と `prompts/plan.prompt.md` の `model:` はコメントアウトしてある。VS Code のモデルピッカーに出る名前を確認して埋める。存在しない名前を書くとそのエージェントが動かなくなる。手順は `docs/model-routing.md`。
-- memory MCP を使うなら、保存先の `.copilot-memory.jsonl` を対象リポジトリの `.gitignore` に足す。個人の作業経緯なので共有しない。
+- 記憶は Copilot 組み込みの Memory に任せる。CLI で切りたいときは `/memory off`。
 
 ## 確認
 

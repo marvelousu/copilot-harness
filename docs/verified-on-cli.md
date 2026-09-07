@@ -11,7 +11,7 @@ GitHub Copilot CLI 1.0.83、Windows 11、node 24.13、uv 0.10.7 で実際に導�
 | preToolUse フック | `~/.copilot/hooks/` に置けば発火。拒否も正しく伝わる |
 | ガードスクリプト | 拒否、通過、不正入力での素通しの3系統とも期待どおり |
 | context7 | 接続成功 |
-| memory | 起動成功。`Knowledge Graph MCP Server running on stdio` |
+| memory (MCP) | 起動は成功したが採用を取り消した。Copilot 組み込みの Memory があり、CLI では設定 `memory` が既定で有効 |
 | desktop | 接続成功。ウィンドウ列挙と VS Code の GUI 操作まで実行 |
 | `.github/agents/` のカスタムエージェント | `--agent reviewer` で役割と参照スキルを正しく答えた。frontmatter の `# model:` コメント行は問題ない |
 
@@ -81,6 +81,22 @@ VS Code 1.130 には Copilot Chat 0.58.0 が同梱されており、`code --inst
 **実行時の接続は未検証。** サーバは Agent モードで実際に使われるまで起動せず、全ログが 0 バイトのままだった。Copilot Chat のパネルは Agent モードで開いたが、ステータスバーに Sign In が表示されており、Copilot へのサインインが済んでいない。サインインは利用者の操作なので、ここで止めた。
 
 したがって VS Code 側で未確認のものは、MCP サーバの接続、`.github/agents/` のカスタムエージェント、`.github/prompts/` のプロンプトファイル、`applyTo` 付き指示ファイルの4つ。サインイン後に Agent モードで「利用可能な MCP サーバとツールを列挙して」と投げれば、上記ログにサーバごとの結果が書かれる。
+
+## 設定テンプレートとモデル振り分け
+
+`~/.copilot/settings.json` は読まれる。デバッグログに `Model '...' from config file` と出る。
+
+**存在しても契約で使えないモデル名を書くと、黙って別のモデルに落ちる。** `claude-sonnet-5` を書いたところ、この検証アカウントでは権利がなく、警告をログに残しただけで `mai-code-1.1-flash` に切り替わった。設定なしのときの既定は `gpt-5.6-luna` なので、落ち先は既定とも違う。`--model` で明示した場合だけエラーで止まる。導入後は `--usage-output-file` の `modelMetrics` で実際に使われたモデルを必ず確認する。
+
+`subagents.agents.<名前>` は `--agent <名前>` で呼ぶカスタムエージェントに効く。既定を `mai-code-1.1-flash`、`reviewer` を `gpt-5.6-luna` にして実行したところ、通常起動は前者、`--agent reviewer` は後者になった。振り分けは設定だけで成立する。
+
+モデルの権利区分はログ内の `/models` 応答に載っている。Business で使える主なものは次のとおり。テンプレートは Business 前提で GPT の3段にしてある。Claude で組むなら `claude-opus-5` が上位、`claude-sonnet-5` が中位に当たる。`claude-haiku-4.5` は権利区分が空で選べるか判然としないので、下位には `gpt-5.6-luna` を使う。
+
+| 段 | GPT 系 | Claude 系 |
+|---|---|---|
+| 上位 | gpt-5.6-sol、gpt-5.5、gpt-6-astra | claude-opus-5、claude-fable-5.1 |
+| 中位 | gpt-5.6-terra、gpt-5.4 | claude-sonnet-5 |
+| 下位 | gpt-5.6-luna、gpt-5.4-mini | 該当なし |
 
 ## 実測コスト
 

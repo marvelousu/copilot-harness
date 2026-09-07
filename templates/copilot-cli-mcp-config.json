@@ -1,15 +1,9 @@
 {
-  "$comment": "Copilot CLI 用。~/.copilot/mcp-config.json にコピーして使う。CLI はワークスペース内の .mcp.json を読まない (1.0.83 で実測)。github を含めないのは、CLI に github-mcp-server が内蔵されており、書くと既定の絞り込みが全ツールに上書きされるため。desktop は CLI で接続とウィンドウ列挙まで実測済み。",
+  "$comment": "Copilot CLI 用。~/.copilot/mcp-config.json にコピーして使う。CLI はワークスペース内の .mcp.json を読まない (1.0.83 で実測)。github を含めないのは、CLI に github-mcp-server が内蔵されており、書くと既定の絞り込みが全ツールに上書きされるため。記憶は CLI 組み込みの Memory (設定 memory、既定 true) に任せる。desktop は CLI で接続とウィンドウ列挙まで実測済み。",
   "mcpServers": {
     "context7": {
       "type": "http",
       "url": "https://mcp.context7.com/mcp"
-    },
-    "memory": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory"],
-      "env": { "MEMORY_FILE_PATH": "./.copilot-memory.jsonl" }
     },
     "playwright": {
       "type": "stdio",

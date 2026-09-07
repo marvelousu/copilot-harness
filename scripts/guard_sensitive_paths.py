@@ -1,20 +1,25 @@
 #!/usr/bin/env python3
-"""Copilot preToolUse hook: block tool calls that touch credential-bearing files.
+"""Copilot preToolUse hook: guard credential files and irreversible git commands.
 
 Protocol: read the tool call as JSON on stdin, write a decision as JSON on stdout.
-  {"permissionDecision": "deny", "permissionDecisionReason": "..."}
+  {"permissionDecision": "deny" | "ask", "permissionDecisionReason": "..."}
 Emitting nothing leaves the normal permission flow untouched.
 
-Copilot's stdin schema is not identical across surfaces, so this walks every string
-in the payload instead of relying on specific key names. It fails open: any parse
-error or unexpected shape allows the call rather than blocking work.
+Two tiers:
+  deny  credential-bearing files are never touched, whatever the user said.
+  ask   force push and --no-verify need a human in the loop. Under cloud agent
+        "ask" degrades to deny because nobody can answer, which is the safe side.
+
+Copilot's stdin schema is not identical across surfaces, so this walks every
+string in the payload instead of relying on specific key names. It fails open:
+any parse error or unexpected shape allows the call rather than blocking work.
 """
 
 import json
 import re
 import sys
 
-PATTERNS = [
+DENY_PATTERNS = [
     r"(^|[\s\\/=\"'`:])\.env($|[\s\"'`;<>|&])",
     r"(^|[\s\\/=\"'`:])\.env\.",
     r"secrets?\.(json|ya?ml|txt)($|[\s\"'`;<>|&])",
@@ -30,7 +35,14 @@ PATTERNS = [
     r"(^|[\s\\/])\.aws([\\/]|$)",
 ]
 
-COMPILED = [re.compile(p, re.IGNORECASE) for p in PATTERNS]
+ASK_PATTERNS = [
+    r"\bgit\b[^\n]*\bpush\b[^\n]*(\s--force\b|\s-f\b|\s--force-with-lease\b)",
+    r"\bgit\b[^\n]*\s--no-verify\b",
+    r"\bgit\b[^\n]*\breset\b[^\n]*\s--hard\b",
+]
+
+DENY = [re.compile(p, re.IGNORECASE) for p in DENY_PATTERNS]
+ASK = [re.compile(p, re.IGNORECASE) for p in ASK_PATTERNS]
 
 
 def walk_strings(node):
@@ -45,6 +57,20 @@ def walk_strings(node):
             yield from walk_strings(value)
 
 
+def decide(payload):
+    """Return (decision, reason) or None when the call needs no intervention."""
+    for text in walk_strings(payload):
+        normalized = text.replace("\\", "/")
+        snippet = text[:120].replace("\n", " ")
+        for pattern in DENY:
+            if pattern.search(normalized):
+                return "deny", "resource holding credentials: " + snippet
+        for pattern in ASK:
+            if pattern.search(text):
+                return "ask", "irreversible git operation needs explicit approval: " + snippet
+    return None
+
+
 def main():
     # Windows text-mode stdin decodes as the ANSI code page and raises on UTF-8
     # input, so decode the raw buffer explicitly.
@@ -54,22 +80,10 @@ def main():
     except Exception:
         return  # fail open
 
-    for text in walk_strings(payload):
-        normalized = text.replace("\\", "/")
-        for pattern in COMPILED:
-            if pattern.search(normalized):
-                snippet = text[:120].replace("\n", " ")
-                print(
-                    json.dumps(
-                        {
-                            "permissionDecision": "deny",
-                            "permissionDecisionReason": (
-                                "resource holding credentials: " + snippet
-                            ),
-                        }
-                    )
-                )
-                return
+    verdict = decide(payload)
+    if verdict:
+        decision, reason = verdict
+        print(json.dumps({"permissionDecision": decision, "permissionDecisionReason": reason}))
 
 
 if __name__ == "__main__":
